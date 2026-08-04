@@ -18,39 +18,30 @@
     <a href="index.html">Voltar para Lista</a>
 
     <script>
-        // Lógica Híbrida: Serve tanto para Criar quanto para Editar!
-
-        // 1. Pega o "id" lá de cima na URL do navegador (ex: form.html?id=3)
         const urlParams = new URLSearchParams(window.location.search);
         const idEdicao = urlParams.get('id');
 
-        // 2. Se a pessoa clicou no botão "Editar" e trouxe um ID, vamos mudar a tela
         if (idEdicao) {
             document.getElementById('titulo-pagina').innerText = "Editar Livro (ID: " + idEdicao + ")";
             carregarLivroParaEditar(idEdicao);
         }
 
-        // 3. Busca os dados no Banco para preencher os inputs antes do usuário editar
         async function carregarLivroParaEditar(id) {
             const resposta = await fetch('http://localhost:8000/api/livros/' + id);
             const livro = await resposta.json();
             
-            // Joga os valores dentro das caixinhas
             document.getElementById('titulo').value = livro.titulo;
             document.getElementById('autor').value = livro.autor;
         }
 
-        // 4. Salva (Cria se não tiver ID, Atualiza se tiver ID)
         async function salvarLivro() {
             const nomeDigitado = document.getElementById('titulo').value;
             const autorDigitado = document.getElementById('autor').value;
 
-            // Define a URL Dinâmica
             const urlDaApi = idEdicao 
-                ? 'http://localhost:8000/api/livros/' + idEdicao  // Se for atualizar
-                : 'http://localhost:8000/api/livros';             // Se for criar
+                ? 'http://localhost:8000/api/livros/' + idEdicao
+                : 'http://localhost:8000/api/livros';
 
-            // Define o Método Dinâmico
             const verboHTTP = idEdicao ? 'PUT' : 'POST';
 
             const resposta = await fetch(urlDaApi, {
@@ -59,17 +50,16 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    titulo: nomeDigitado, // A API espera 'titulo' e não 'name'!
+                    titulo: nomeDigitado,
                     autor: autorDigitado
                 })
             });
 
-            // Se for 201 (Created) ou 200 (OK/Updated)
             if (resposta.status === 201 || resposta.status === 200) {
                 alert('Salvo com sucesso!');
-                window.location.href = 'index.html'; // Volta pra lista automaticamente
+                window.location.href = 'index.html';
             } else {
-                alert('Erro na API ao salvar (Status: ' + resposta.status + '). Olhe a aba Network do F12!');
+                alert('Erro na API ao salvar (Status: ' + resposta.status + ').');
             }
         }
     </script>

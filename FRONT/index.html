@@ -17,18 +17,16 @@
     </ul>
 
     <script>
-        // Função para carregar a lista
         async function carregarLivros() {
             try {
                 const resposta = await fetch('http://localhost:8000/api/livros');
                 const livros = await resposta.json();
 
                 const ul = document.getElementById('lista');
-                ul.innerHTML = ''; // Limpa o carregando
+                ul.innerHTML = '';
 
                 livros.forEach(livro => {
                     const li = document.createElement('li');
-                    // Usando "livro.titulo" e "livro.autor", e colocando o botão de Apagar E de Editar
                     li.innerHTML = `
                         ${livro.titulo} - Autor: ${livro.autor}
                         <button onclick="deletarLivro(${livro.id})">Apagar</button>                
@@ -39,11 +37,10 @@
                     ul.appendChild(li);
                 });
             } catch (error) {
-                document.getElementById('lista').innerHTML = "<li>Erro ao conectar com a API! Verifique o console.</li>";
+                document.getElementById('lista').innerHTML = "<li>Erro ao conectar com a API!</li>";
             }
         }
 
-        // Função para apagar (DELETE)
         async function deletarLivro(id) {
             const resposta = await fetch('http://localhost:8000/api/livros/' + id, {
                 method: 'DELETE'
@@ -51,13 +48,12 @@
 
             if (resposta.status === 200) {
                 alert('Deletado com sucesso!');
-                carregarLivros(); // Recarrega a lista para sumir o item apagado
+                carregarLivros();
             } else {
-                alert('Falha ao deletar! O Backend estourou um erro.');
+                alert('Falha ao deletar!');
             }
         }
 
-        // Chama ao abrir a página
         carregarLivros();
     </script>
 </body>
