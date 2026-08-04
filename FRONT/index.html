@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista Livros</title>
+</head>
+
+<body>
+    <h1>Lista de Livros</h1>
+    <a href="form.html">Criar Livro</a>
+    <br><br>
+
+    <ul id="lista">
+        <li>Carregando...</li>
+    </ul>
+
+    <script>
+        // Função para carregar a lista
+        async function carregarLivros() {
+            try {
+                const resposta = await fetch('http://localhost:8000/api/livros');
+                const livros = await resposta.json();
+
+                const ul = document.getElementById('lista');
+                ul.innerHTML = ''; // Limpa o carregando
+
+                livros.forEach(livro => {
+                    const li = document.createElement('li');
+                    // Usando "livro.titulo" e "livro.autor", e colocando o botão de Apagar E de Editar
+                    li.innerHTML = `
+                        ${livro.titulo} - Autor: ${livro.autor}
+                        <button onclick="deletarLivro(${livro.id})">Apagar</button>                
+                        <a href="form.html?id=${livro.id}">
+                            <button>Editar</button>
+                        </a>
+                    `;
+                    ul.appendChild(li);
+                });
+            } catch (error) {
+                document.getElementById('lista').innerHTML = "<li>Erro ao conectar com a API! Verifique o console.</li>";
+            }
+        }
+
+        // Função para apagar (DELETE)
+        async function deletarLivro(id) {
+            const resposta = await fetch('http://localhost:8000/api/livros/' + id, {
+                method: 'DELETE'
+            });
+
+            if (resposta.status === 200) {
+                alert('Deletado com sucesso!');
+                carregarLivros(); // Recarrega a lista para sumir o item apagado
+            } else {
+                alert('Falha ao deletar! O Backend estourou um erro.');
+            }
+        }
+
+        // Chama ao abrir a página
+        carregarLivros();
+    </script>
+</body>
+
+</html>

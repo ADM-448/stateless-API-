@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novo/Editar Livro</title>
+</head>
+
+<body>
+    <h1 id="titulo-pagina">Novo Livro</h1>
+
+    <input type="text" id="titulo" placeholder="Título do Livro"><br><br>
+    <input type="text" id="autor" placeholder="Nome do Autor"><br><br>
+    
+    <button onclick="salvarLivro()">Salvar no Banco</button>
+    <br><br>
+    <a href="index.html">Voltar para Lista</a>
+
+    <script>
+        // Lógica Híbrida: Serve tanto para Criar quanto para Editar!
+
+        // 1. Pega o "id" lá de cima na URL do navegador (ex: form.html?id=3)
+        const urlParams = new URLSearchParams(window.location.search);
+        const idEdicao = urlParams.get('id');
+
+        // 2. Se a pessoa clicou no botão "Editar" e trouxe um ID, vamos mudar a tela
+        if (idEdicao) {
+            document.getElementById('titulo-pagina').innerText = "Editar Livro (ID: " + idEdicao + ")";
+            carregarLivroParaEditar(idEdicao);
+        }
+
+        // 3. Busca os dados no Banco para preencher os inputs antes do usuário editar
+        async function carregarLivroParaEditar(id) {
+            const resposta = await fetch('http://localhost:8000/api/livros/' + id);
+            const livro = await resposta.json();
+            
+            // Joga os valores dentro das caixinhas
+            document.getElementById('titulo').value = livro.titulo;
+            document.getElementById('autor').value = livro.autor;
+        }
+
+        // 4. Salva (Cria se não tiver ID, Atualiza se tiver ID)
+        async function salvarLivro() {
+            const nomeDigitado = document.getElementById('titulo').value;
+            const autorDigitado = document.getElementById('autor').value;
+
+            // Define a URL Dinâmica
+            const urlDaApi = idEdicao 
+                ? 'http://localhost:8000/api/livros/' + idEdicao  // Se for atualizar
+                : 'http://localhost:8000/api/livros';             // Se for criar
+
+            // Define o Método Dinâmico
+            const verboHTTP = idEdicao ? 'PUT' : 'POST';
+
+            const resposta = await fetch(urlDaApi, {
+                method: verboHTTP,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    titulo: nomeDigitado, // A API espera 'titulo' e não 'name'!
+                    autor: autorDigitado
+                })
+            });
+
+            // Se for 201 (Created) ou 200 (OK/Updated)
+            if (resposta.status === 201 || resposta.status === 200) {
+                alert('Salvo com sucesso!');
+                window.location.href = 'index.html'; // Volta pra lista automaticamente
+            } else {
+                alert('Erro na API ao salvar (Status: ' + resposta.status + '). Olhe a aba Network do F12!');
+            }
+        }
+    </script>
+</body>
+
+</html>
